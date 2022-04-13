@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 
 function Logo(props){
 
-    console.log(props.change);
 
     const [check, toCheck] = useState(0);
   

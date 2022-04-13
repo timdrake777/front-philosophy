@@ -7,45 +7,97 @@ import axios from 'axios';
 
 function Search (){
 
+    const quotes_s = [
+        {
+            id: 1,
+            author: 'Аристотель',
+            content: 'Будучи вне дома, держите себя так, словно принимаете почетных гостей. Пользуясь услугами людей, ведите себя так, словно свершаете торжественный обряд. Не делайте другим того, чего себе не пожелаете. Тогда ни в государстве, ни в семье не будет недовольства'
+        },
+        {
+            id: 2,
+            author: 'Сократ',
+            content: 'Счастье — это когда тебя понимают, большое счастье — это когда тебя любят, настоящее счастье — это когда любишь ты.'
+        },
+        {
+            id: 3,
+            author: 'Гипократ',
+            content: 'Сергей'
+        }
+    ];
+
     var searchItems = [];
-    var testStr = 'Любовь';
-    var indexItems = [];
+    var itemsToSort = [];
+    var testMas = ['Любовь','Жизнь','Жить','Смысл жизни','Труд','Общество','Бытие','Память','Боль','Родина','Интеллект','Прошлое', 'Мораль', 'Ложь'];
     const[transf,isTransf] = useState(false);
     const axios = require('axios');
+    const [quotes, setQuotes] = useState(quotes_s);
+      
 
-    async function makeGetRequest() {
-        axios.post('https://reqres.in/api/users', {
-            name: 'morpheus',
-            job: 'leader'
+    async function makeGetRequest(request) {
+        axios.post('https://localhost:44381/api/index', {
+            type: request
           })
           .then(function (response) {
             console.log(response);
+            setQuotes(response.data);
           })
           .catch(function (error) {
-            console.log(error);
+              console.log(error);
           });
     }
-      
 
-    function checkCategory(search, searchItems){
-        for (let i = 0; i < searchItems.length; i++){
-                var tempStr = searchItems[i];
-                if (tempStr.length > search.length){
-                    for (let g = 0; g < search.length; g++){
-                        if (tempStr[g].toLowerCase() === testStr[g].toLowerCase()){
-                            indexItems[i] += 1;
-                        }
-                    }
-                }
-                else {
-                    for (let z = 0; z < tempStr.length; z++){
-                        if (testStr[z].toLowerCase() === tempStr[z].toLowerCase()){
-                            indexItems[i] += 1;
-                        }
-                    }
-                }
+    function maxElement(itemsToSort){
+        let sumOfElements = [];
+        for (let q = 0; q < itemsToSort.length; q++){
+            sumOfElements[q] = 0;
+        } 
+        for (let i = 0; i < itemsToSort.length; i++){
+            for(let j = 0; j < itemsToSort[i].length; j++){
+                sumOfElements[i] += itemsToSort[i][j];
+            }
         }
-        console.log(indexItems);
+        let max = sumOfElements[0];
+        let index = 0;
+        for (let z = 0; z < sumOfElements.length; z++){
+            if (max < sumOfElements[z]){
+                max = sumOfElements[z];
+                index = z;
+            }
+        }
+        return index;
+    }
+
+    function checkCategory(searchItems, testMas){
+        let indexItems = [];
+        for (let q = 0; q < testMas.length; q++){
+            for (let i = 0; i < searchItems.length; i++){
+                indexItems[i] = 0;
+            }
+            for (let i = 0; i < searchItems.length; i++){
+                    var tempStr = searchItems[i];
+                    var tempStr2 = testMas[q];
+                    if (tempStr.length > tempStr2.length){
+                        for (let g = 0; g < tempStr2.length; g++){
+                            if (tempStr[g].toLowerCase() === tempStr2[g].toLowerCase()){
+                                indexItems[i] += 1;
+                            }
+                        }
+                    }
+                    else {
+                        for (let z = 0; z < tempStr.length; z++){
+                            if (tempStr2[z].toLowerCase() === tempStr[z].toLowerCase()){
+                                indexItems[i] += 1;
+                            }
+                        }
+                    }
+            }
+            itemsToSort[q] = indexItems;
+            indexItems = [];
+        }
+        console.log(itemsToSort);
+        var request = testMas[maxElement(itemsToSort)];
+        console.log(request);
+        return request;
     }
 
     function transformSearch (){
@@ -58,7 +110,6 @@ function Search (){
         searchBar.style.transform = 'scale(0.7)';
         inputBar.style.padding = '1%';
         changeInput.style.margin = '0px auto 15px auto';
-        makeGetRequest();
     }
 
     const onKeyDown = e =>{
@@ -71,10 +122,7 @@ function Search (){
                 if (transf === false){
                     isTransf(true);
                 }
-                for (let i = 0; i < searchItems.length; i++){
-                    indexItems[i] = 0;
-                }
-                checkCategory(testStr, searchItems);
+                makeGetRequest(checkCategory(searchItems, testMas));
             }
         }
     }
@@ -86,7 +134,7 @@ function Search (){
             <div className="text-field__icon text-field__icon_search" id='search' style={{display: 'flex'}}>
                 <input type="text" className='text_field-input' id='input' placeholder='Введите ваш вопрос здесь' maxLength={50} onKeyDown={onKeyDown} />
             </div>
-            <Card ></Card>
+            <Card quotes={quotes}></Card>
         </div>
     )
 }
